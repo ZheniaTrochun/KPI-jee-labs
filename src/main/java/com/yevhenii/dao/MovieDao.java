@@ -15,8 +15,6 @@ import java.util.List;
  */
 public class MovieDao extends PaginatedDao<Movie, Integer> {
 
-    private static final int PAGE_SIZE = 30;
-
     private static final String INSERT_QUERY_TEMPLATE = "INSERT INTO Movies (name, author, year, genre, imdbScore) VALUES (%s, %s, %d, %s, %f)";
     private static final String UPDATE_QUERY_TEMPLATE = "UPDATE Movies SET name = %s, author = %s, year = %d, genre = %s, imdbScore = %f WHERE id = %d";
     private static final String CREATE_SCHEMA_QUERY = "CREATE TABLE Movies (\n" +
@@ -28,27 +26,22 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
             "    imdbScore double,\n" +
             "    PRIMARY KEY (id),\n" +
             ");";
-    private static final String DROP_SCHEMA_QUERY = "DROP TABLE Movies";
 
     MovieDao(int pageSize, String driver, String url) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
                 "Movies",
-                CREATE_SCHEMA_QUERY,
-                DROP_SCHEMA_QUERY,
                 driver,
                 url,
                 pageSize);
     }
 
-    public MovieDao(String driver, String url) {
+    MovieDao(String driver, String url) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
                 "Movies",
-                CREATE_SCHEMA_QUERY,
-                DROP_SCHEMA_QUERY,
                 driver,
                 url);
     }
@@ -77,7 +70,8 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
     }
 
     @Override
-    public List<Movie> findByQuery(String query) {
-        return null;
+    protected String getCreateSchemaQuery() {
+
+        return CREATE_SCHEMA_QUERY;
     }
 }

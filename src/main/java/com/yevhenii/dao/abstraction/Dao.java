@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-public interface DAO <E, T> {
+public interface Dao<E, T> {
     Optional<E> findOne(T id) throws SQLException;
 
     List<E> findAll() throws SQLException, IllegalAccessException, NoSuchFieldException, InstantiationException;

@@ -1,6 +1,5 @@
 package com.yevhenii.dao.abstraction;
 
-import com.yevhenii.dao.abstraction.DAO;
 import com.yevhenii.dao.connection.ConnectionManager;
 import com.yevhenii.dao.connection.ConnectionManagerImpl;
 
@@ -8,7 +7,7 @@ import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
-public abstract class AbstractDao<E, T> implements DAO<E, T> {
+public abstract class AbstractDao<E, T> implements Dao<E, T> {
 
     protected Class<E> type;
     protected List<String> fields;
@@ -20,11 +19,9 @@ public abstract class AbstractDao<E, T> implements DAO<E, T> {
     protected final String ID_SEARCH_QUERY;
     protected final String DELETE_QUERY;
 
-    protected String createSchemaQuery;
-    protected String dropSchemaQuery;
+    protected final String DROP_SCHEMA_QUERY;
 
-    public AbstractDao(Class<E> type, List<String> fields, String tableName, String createSchemaQuery,
-                       String dropSchemaQuery, String driver, String url) {
+    public AbstractDao(Class<E> type, List<String> fields, String tableName, String driver, String url) {
 
         this.type = type;
         this.fields = fields;
@@ -36,8 +33,7 @@ public abstract class AbstractDao<E, T> implements DAO<E, T> {
 
         this.connectionManager = new ConnectionManagerImpl<>(driver, url);
 
-        this.createSchemaQuery = createSchemaQuery;
-        this.dropSchemaQuery = dropSchemaQuery;
+        this.DROP_SCHEMA_QUERY = String.format("DROP TABLE %s", tableName);
     }
 
     @Override
@@ -120,9 +116,23 @@ public abstract class AbstractDao<E, T> implements DAO<E, T> {
         });
     }
 
+    @Override
+    public void createSchema() throws SQLException {
+        connectionManager
+                .withConnection(conn -> conn.prepareStatement(getCreateSchemaQuery()).execute());
+    }
+
+    @Override
+    public void dropSchema() throws SQLException {
+        connectionManager
+                .withConnection(conn -> conn.prepareStatement(DROP_SCHEMA_QUERY).execute());
+    }
+
     protected abstract String createInsertQuery(E entity);
 
     protected abstract String createUpdateQuery(E entity);
+
+    protected abstract String getCreateSchemaQuery();
 
 
     protected List<String> rsFields(ResultSetMetaData metaData) throws SQLException {
@@ -194,17 +204,5 @@ public abstract class AbstractDao<E, T> implements DAO<E, T> {
         }
 
         return entity;
-    }
-
-    @Override
-    public void createSchema() throws SQLException {
-        connectionManager
-                .withConnection(conn -> conn.prepareStatement(createSchemaQuery).execute());
-    }
-
-    @Override
-    public void dropSchema() throws SQLException {
-        connectionManager
-                .withConnection(conn -> conn.prepareStatement(dropSchemaQuery).execute());
     }
 }

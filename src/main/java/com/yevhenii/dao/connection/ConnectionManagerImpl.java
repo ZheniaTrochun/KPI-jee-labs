@@ -24,7 +24,7 @@ public class ConnectionManagerImpl<E, K> implements ConnectionManager<E, K> {
     public <T> T withConnection(Connected<T> execution) throws SQLException {
         T result;
 
-        try (Connection connection = DriverManager.getConnection(url)) {
+        try (Connection connection = DriverManager.getConnection(url, "sa", "")) {
             result = execution.connected(connection);
         }
 

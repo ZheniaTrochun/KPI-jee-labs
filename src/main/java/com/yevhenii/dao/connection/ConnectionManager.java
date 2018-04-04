@@ -7,10 +7,4 @@ import java.util.List;
 public interface ConnectionManager<E, K> {
 
     <T> T withConnection(Connected<T> execution) throws SQLException;
-
-    @FunctionalInterface
-    interface Connected<E> {
-
-        E connected(Connection connection) throws SQLException;
-    }
 }
