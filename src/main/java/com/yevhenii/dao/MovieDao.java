@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class MovieDao extends PaginatedDao<Movie, Integer> {
 
+    private static MovieDao instance;
+
     private static final String INSERT_QUERY_TEMPLATE = "INSERT INTO Movies (name, author, year, genre, imdbScore) VALUES (%s, %s, %d, %s, %f)";
     private static final String UPDATE_QUERY_TEMPLATE = "UPDATE Movies SET name = %s, author = %s, year = %d, genre = %s, imdbScore = %f WHERE id = %d";
     private static final String CREATE_SCHEMA_QUERY = "CREATE TABLE Movies (\n" +
@@ -29,7 +31,7 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
             "    PRIMARY KEY (id),\n" +
             ");";
 
-    MovieDao(ConnectionManager connectionManager, int pageSize) {
+    private MovieDao(ConnectionManager connectionManager, int pageSize) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
@@ -38,7 +40,7 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
                 pageSize);
     }
 
-    MovieDao(ConnectionManager connectionManager) {
+    private MovieDao(ConnectionManager connectionManager) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
@@ -73,5 +75,17 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
     protected String getCreateSchemaQuery() {
 
         return CREATE_SCHEMA_QUERY;
+    }
+
+    public static MovieDao getInstance() {
+        if (instance == null) {
+            instance = new MovieDao(
+                    new ConnectionManagerImpl("org.h2.Driver",
+                            "jdbc:h2:~/test",
+                            "sa",
+                            ""));
+        }
+
+        return instance;
     }
 }
