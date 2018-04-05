@@ -1,6 +1,8 @@
 package com.yevhenii.dao;
 
 import com.yevhenii.dao.abstraction.PaginatedDao;
+import com.yevhenii.dao.connection.ConnectionManager;
+import com.yevhenii.dao.connection.ConnectionManagerImpl;
 import com.yevhenii.model.Movie;
 
 import java.sql.PreparedStatement;
@@ -27,23 +29,21 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
             "    PRIMARY KEY (id),\n" +
             ");";
 
-    MovieDao(int pageSize, String driver, String url) {
+    MovieDao(ConnectionManager connectionManager, int pageSize) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
                 "Movies",
-                driver,
-                url,
+                connectionManager,
                 pageSize);
     }
 
-    MovieDao(String driver, String url) {
+    MovieDao(ConnectionManager connectionManager) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
                 "Movies",
-                driver,
-                url);
+                connectionManager);
     }
 
     @Override

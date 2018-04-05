@@ -13,7 +13,7 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     protected List<String> fields;
     protected String tableName;
 
-    protected ConnectionManager<E, T> connectionManager;
+    protected ConnectionManager connectionManager;
 
     protected final String ALL_SEARCH_QUERY;
     protected final String ID_SEARCH_QUERY;
@@ -21,7 +21,7 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
 
     protected final String DROP_SCHEMA_QUERY;
 
-    public AbstractDao(Class<E> type, List<String> fields, String tableName, String driver, String url) {
+    public AbstractDao(Class<E> type, List<String> fields, String tableName, ConnectionManager connectionManager) {
 
         this.type = type;
         this.fields = fields;
@@ -31,7 +31,7 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
         ID_SEARCH_QUERY = String.format("SELECT * FROM %s WHERE id = ?", tableName);
         DELETE_QUERY = String.format("DELETE %s WHERE id = ?", tableName);
 
-        this.connectionManager = new ConnectionManagerImpl<>(driver, url);
+        this.connectionManager = connectionManager;
 
         this.DROP_SCHEMA_QUERY = String.format("DROP TABLE %s", tableName);
     }
@@ -58,7 +58,7 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     public List<E> findAll() throws SQLException {
 
         return connectionManager.withConnection(connection -> {
-            ResultSet rs = connection.prepareStatement(ALL_SEARCH_QUERY).executeQuery();
+            ResultSet rs = connection.createStatement().executeQuery(ALL_SEARCH_QUERY);
 
             if (checkCompability(rs.getMetaData()))
                 throw new SQLException("Unmatched fields!");
@@ -82,9 +82,9 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     public T save(E entity) throws SQLException {
 
         return connectionManager.withConnection(connection -> {
-            PreparedStatement statement = connection.prepareStatement(createInsertQuery(entity), Statement.RETURN_GENERATED_KEYS);
+            Statement statement = connection.createStatement();
 
-            int affectedRows = statement.executeUpdate();
+            int affectedRows = statement.executeUpdate(createInsertQuery(entity), Statement.RETURN_GENERATED_KEYS);
 
             if (affectedRows == 0)
                 throw new SQLException("Creating failed, no rows affected.");
@@ -105,12 +105,13 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     public E update(E entity) throws SQLException {
 
         return connectionManager.withConnection(connection -> {
-            PreparedStatement statement = connection.prepareStatement(createUpdateQuery(entity));
 
-            int affectedRows = statement.executeUpdate();
+            int affectedRows = connection
+                    .createStatement()
+                    .executeUpdate(createUpdateQuery(entity));
 
             if (affectedRows == 0)
-                throw new SQLException("Creating failed, no rows affected.");
+                throw new SQLException("Update failed, no rows affected.");
 
             return entity;
         });
@@ -119,13 +120,13 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     @Override
     public void createSchema() throws SQLException {
         connectionManager
-                .withConnection(conn -> conn.prepareStatement(getCreateSchemaQuery()).execute());
+                .withConnection(conn -> conn.createStatement().execute(getCreateSchemaQuery()));
     }
 
     @Override
     public void dropSchema() throws SQLException {
         connectionManager
-                .withConnection(conn -> conn.prepareStatement(DROP_SCHEMA_QUERY).execute());
+                .withConnection(conn -> conn.createStatement().execute(DROP_SCHEMA_QUERY));
     }
 
     protected abstract String createInsertQuery(E entity);
@@ -151,7 +152,6 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     }
 
     protected List<E> extractAllEntities(ResultSet rs) throws SQLException {
-        List<String> rsFields = rsFields(rs.getMetaData());
 
         List<E> entities = new LinkedList<>();
         try {
