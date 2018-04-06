@@ -19,8 +19,8 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
 
     private static MovieDao instance;
 
-    private static final String INSERT_QUERY_TEMPLATE = "INSERT INTO Movies (name, author, year, genre, imdbScore) VALUES (%s, %s, %d, %s, %f)";
-    private static final String UPDATE_QUERY_TEMPLATE = "UPDATE Movies SET name = %s, author = %s, year = %d, genre = %s, imdbScore = %f WHERE id = %d";
+    private static final String INSERT_QUERY_TEMPLATE = "INSERT INTO Movies (name, author, year, genre, imdbScore) VALUES ('%s', '%s', %d, '%s', %f);";
+    private static final String UPDATE_QUERY_TEMPLATE = "UPDATE Movies SET name = '%s', author = '%s', year = %d, genre = '%s', imdbScore = %f WHERE id = %d";
     private static final String CREATE_SCHEMA_QUERY = "CREATE TABLE Movies (\n" +
             "    id int NOT NULL AUTO_INCREMENT,\n" +
             "    name varchar(50),\n" +
@@ -31,7 +31,7 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
             "    PRIMARY KEY (id),\n" +
             ");";
 
-    private MovieDao(ConnectionManager connectionManager, int pageSize) {
+    MovieDao(ConnectionManager connectionManager, int pageSize) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
@@ -40,7 +40,7 @@ public class MovieDao extends PaginatedDao<Movie, Integer> {
                 pageSize);
     }
 
-    private MovieDao(ConnectionManager connectionManager) {
+    MovieDao(ConnectionManager connectionManager) {
 
         super(Movie.class,
                 Arrays.asList("id", "name", "author", "year", "genre", "imdbScore"),
