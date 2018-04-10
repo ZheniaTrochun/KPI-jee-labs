@@ -22,20 +22,12 @@ public class MovieDaoTest {
 
     @Before
     public void setUp() {
-        try {
-            dao.createSchema();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        dao.createSchema();
     }
 
     @After
     public void tearDown() {
-        try {
-            dao.dropSchema();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        dao.dropSchema();
     }
 
     @Test
@@ -103,9 +95,9 @@ public class MovieDaoTest {
         entity.setId(id);
         entity.setImdbScore(9.9);
 
-        Movie actual = dao.update(entity);
+        boolean actual = dao.update(entity);
 
-        Assert.assertEquals(entity, actual);
+        Assert.assertTrue(actual);
         Assert.assertEquals(dao.findOne(id).get().getImdbScore(), Double.valueOf(9.9));
     }
 }

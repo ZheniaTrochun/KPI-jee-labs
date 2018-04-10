@@ -24,17 +24,17 @@ out.println(it.next().toString()+"<br>");
 }
 %>
 
-    <form method="delete" action="movies">
+    <form method="post" action="movies">
         <br>
-        <label>
-            <input type="number" name="id" placeholder="id">
-        </label>
+        <input type="hidden" name="method" value="delete">
+        <input type="number" name="id" placeholder="id">
         <br><br>
         <input type="submit" value="delete">
     </form>
 
-    <form method="put" action="movies">
+    <form method="post" action="movies">
         <br>
+        <input type="hidden" name="method" value="put">
         <input type="number" name="id" placeholder="id">
         <input type="text" name="name" placeholder="name">
         <input type="text" name="genre" placeholder="genre">
