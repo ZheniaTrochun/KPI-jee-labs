@@ -1,21 +1,20 @@
 package com.yevhenii.dao.abstraction;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 public interface Dao<E, T> {
-    Optional<E> findOne(T id) throws SQLException;
+    Optional<E> findOne(T id);
 
-    List<E> findAll() throws SQLException, IllegalAccessException, NoSuchFieldException, InstantiationException;
+    List<E> findAll();
 
-    T save(E entity) throws SQLException;
+    T save(E entity);
 
-    boolean delete(T id) throws SQLException;
+    boolean delete(T id);
 
-    E update(E entity) throws SQLException;
+    boolean update(E entity);
 
-    void createSchema() throws SQLException;
+    void createSchema();
 
-    void dropSchema() throws SQLException;
+    void dropSchema();
 }

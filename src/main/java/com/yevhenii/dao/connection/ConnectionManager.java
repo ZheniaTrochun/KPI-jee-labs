@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 public interface ConnectionManager {
 
-    <T> T withConnection(Connected<T> execution) throws SQLException;
+    <T> QueryResult<T> withConnection(Connected<T> execution);
 
     Connection getConnection() throws SQLException;
 }

@@ -4,6 +4,7 @@ package com.yevhenii.dao.abstraction;
 import com.yevhenii.dao.connection.ConnectionManager;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class PaginatedDao <E, K> extends AbstractDao<E, K> {
@@ -19,7 +20,7 @@ public abstract class PaginatedDao <E, K> extends AbstractDao<E, K> {
         super(type, fields, tableName, manager);
     }
 
-    public List<E> findAllByPage(int page) throws SQLException {
+    public List<E> findAllByPage(int page) {
 
         return connectionManager.withConnection(connection ->
                 extractAllEntities(
@@ -28,10 +29,10 @@ public abstract class PaginatedDao <E, K> extends AbstractDao<E, K> {
                                     (page - 1) * pageSize, pageSize))
                             .executeQuery()
                 )
-        );
+        ).getOrElse(new ArrayList<>());
     }
 
-    public List<E> findByQueryAndPage(String query, int page) throws SQLException {
+    public List<E> findByQueryAndPage(String query, int page) {
 
         return connectionManager.withConnection(connection ->
                 extractAllEntities(
@@ -39,6 +40,6 @@ public abstract class PaginatedDao <E, K> extends AbstractDao<E, K> {
                                 .prepareStatement(String.format("%s LIMIT %d, %d", query, (page - 1) * pageSize, pageSize))
                                 .executeQuery()
                 )
-        );
+        ).getOrElse(new ArrayList<>());
     }
 }

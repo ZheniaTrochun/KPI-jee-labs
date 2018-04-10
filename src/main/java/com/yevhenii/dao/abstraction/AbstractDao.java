@@ -37,7 +37,7 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     }
 
     @Override
-    public Optional<E> findOne(T id) throws SQLException {
+    public Optional<E> findOne(T id){
 
         return Optional.ofNullable(
                 connectionManager.withConnection(connection -> {
@@ -50,12 +50,12 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
                         throw new SQLException("Unmatched fields!");
 
                     return extractEntity(rs);
-                })
+                }).get()
         );
     }
 
     @Override
-    public List<E> findAll() throws SQLException {
+    public List<E> findAll() {
 
         return connectionManager.withConnection(connection -> {
             ResultSet rs = connection.createStatement().executeQuery(ALL_SEARCH_QUERY);
@@ -64,22 +64,22 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
                 throw new SQLException("Unmatched fields!");
 
             return extractAllEntities(rs);
-        });
+        }).getOrElse(new ArrayList<>());
     }
 
     @Override
-    public boolean delete(T id) throws SQLException {
+    public boolean delete(T id) {
 
         return connectionManager.withConnection(connection -> {
             PreparedStatement statement = connection.prepareStatement(DELETE_QUERY);
             statement.setObject(1, id);
 
             return statement.execute();
-        });
+        }).getOrElse(false);
     }
 
     @Override
-    public T save(E entity) throws SQLException {
+    public T save(E entity) {
 
         return connectionManager.withConnection(connection -> {
             Statement statement = connection.createStatement();
@@ -98,11 +98,11 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
                     throw new SQLException("Creating failed, no ID obtained.");
                 }
             }
-        });
+        }).get();
     }
 
     @Override
-    public E update(E entity) throws SQLException {
+    public boolean update(E entity) {
 
         return connectionManager.withConnection(connection -> {
 
@@ -110,21 +110,19 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
                     .createStatement()
                     .executeUpdate(createUpdateQuery(entity));
 
-            if (affectedRows == 0)
-                throw new SQLException("Update failed, no rows affected.");
-
-            return entity;
-        });
+            return affectedRows != 0;
+        }).getOrElse(false);
     }
 
     @Override
-    public void createSchema() throws SQLException {
+    public void createSchema() {
         connectionManager
                 .withConnection(conn -> conn.createStatement().execute(getCreateSchemaQuery()));
+
     }
 
     @Override
-    public void dropSchema() throws SQLException {
+    public void dropSchema() {
         connectionManager
                 .withConnection(conn -> conn.createStatement().execute(DROP_SCHEMA_QUERY));
     }

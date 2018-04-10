@@ -34,14 +34,18 @@ public class ConnectionManagerImpl implements ConnectionManager {
     }
 
     @Override
-    public <T> T withConnection(Connected<T> execution) throws SQLException {
+    public <T> QueryResult<T> withConnection(Connected<T> execution) {
         T result;
 
         try (Connection connection = DriverManager.getConnection(url, user, password)) {
-            result = execution.connected(connection);
-        }
 
-        return result;
+            return new QueryResult<>(
+                    execution.connected(connection));
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            return QueryResult.empty();
+        }
     }
 
     @Override
