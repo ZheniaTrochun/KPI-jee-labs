@@ -2,7 +2,6 @@ package com.yevhenii.servlets;
 
 import com.yevhenii.dao.MovieDao;
 import com.yevhenii.model.Movie;
-import com.yevhenii.sevice.MovieService;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,19 +10,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 
 @WebServlet(name = "movieServlet", urlPatterns = "/movies")
 public class MoviesServlet extends HttpServlet {
 
     private final MovieDao dao = MovieDao.getInstance();
-    private final MovieService service = new MovieService();
 
     @Override
     public void init() throws ServletException {
 
+        dao.dropSchema();
         dao.createSchema();
         Arrays.asList(
                 new Movie("1", "1", 1, "1", 1.0),
@@ -39,7 +36,7 @@ public class MoviesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        req.setAttribute("allMovies", service.findAll());
+        req.setAttribute("allMovies", dao.findAll());
 
         RequestDispatcher view = req.getRequestDispatcher("all.jsp");
         view.forward(req, resp);
@@ -54,14 +51,14 @@ public class MoviesServlet extends HttpServlet {
 //            PUT request
             Movie movie = constructMovie(req);
             movie.setId(new Integer(req.getParameter("id")));
-            service.updateMovie(movie);
+            dao.update(movie);
         } else if ("delete".equalsIgnoreCase(method)) {
 //            DELETE request
             Integer id = new Integer(req.getParameter("id"));
-            service.deleteMovie(id);
+            dao.delete(id);
         } else {
 //            actual POST
-            service.createMovie(constructMovie(req));
+            dao.save(constructMovie(req));
         }
 
 //        reload page after any update
@@ -94,13 +91,13 @@ public class MoviesServlet extends HttpServlet {
 //        doGet(req, resp);
 //    }
 //
-//    @Override
-//    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//
-//        Integer id = new Integer(req.getParameter("id"));
-//
-//        dao.delete(id);
-//
-//        doGet(req, resp);
-//    }
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        Integer id = new Integer(req.getParameter("id"));
+
+        dao.delete(id);
+
+        doGet(req, resp);
+    }
 }
