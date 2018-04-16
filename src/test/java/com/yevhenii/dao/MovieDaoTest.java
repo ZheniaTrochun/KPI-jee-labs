@@ -8,6 +8,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -15,14 +17,15 @@ import java.util.Optional;
 
 public class MovieDaoTest {
 
-    private ConnectionManager connectionManager =
-            new ConnectionManagerImpl("org.h2.Driver", "jdbc:h2:~/test", "sa", "");
-
-    private MovieDao dao = new MovieDao(connectionManager);
+    private MovieDao dao = new MovieDao();
 
     @Before
     public void setUp() {
-        dao.createSchema();
+        try {
+            dao.createSchema();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     @After

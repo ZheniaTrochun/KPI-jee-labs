@@ -1,206 +1,127 @@
 package com.yevhenii.dao.abstraction;
 
-import com.yevhenii.dao.connection.ConnectionManager;
-import com.yevhenii.dao.connection.ConnectionManagerImpl;
-
-import java.lang.reflect.Field;
-import java.sql.*;
+import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 public abstract class AbstractDao<E, T> implements Dao<E, T> {
 
     protected Class<E> type;
-    protected List<String> fields;
-    protected String tableName;
+    protected final EntityManagerFactory ENTITY_MANAGER_FACTORY;
 
-    protected ConnectionManager connectionManager;
-
-    protected final String ALL_SEARCH_QUERY;
-    protected final String ID_SEARCH_QUERY;
-    protected final String DELETE_QUERY;
-
-    protected final String DROP_SCHEMA_QUERY;
-
-    public AbstractDao(Class<E> type, List<String> fields, String tableName, ConnectionManager connectionManager) {
-
+    public AbstractDao(Class<E> type, String tableName) {
         this.type = type;
-        this.fields = fields;
-        this.tableName = tableName;
 
-        ALL_SEARCH_QUERY = String.format("SELECT * FROM %s", tableName);
-        ID_SEARCH_QUERY = String.format("SELECT * FROM %s WHERE id = ?", tableName);
-        DELETE_QUERY = String.format("DELETE %s WHERE id = ?", tableName);
+        ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory(tableName);
+    }
 
-        this.connectionManager = connectionManager;
+    public AbstractDao(Class<E> type, EntityManagerFactory entityManagerFactory) {
+        this.type = type;
 
-        this.DROP_SCHEMA_QUERY = String.format("DROP TABLE %s", tableName);
+        ENTITY_MANAGER_FACTORY = entityManagerFactory;
     }
 
     @Override
     public Optional<E> findOne(T id){
 
-        return Optional.ofNullable(
-                connectionManager.withConnection(connection -> {
-                    PreparedStatement statement = connection.prepareStatement(ID_SEARCH_QUERY);
-                    statement.setObject(1, id);
+        EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-                    ResultSet rs = statement.executeQuery();
+        E res = manager.find(type, id);
 
-                    if (checkCompability(rs.getMetaData()))
-                        throw new SQLException("Unmatched fields!");
-
-                    return extractEntity(rs);
-                }).get()
-        );
+        return Optional.ofNullable(res);
     }
 
     @Override
     public List<E> findAll() {
+        EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
 
-        return connectionManager.withConnection(connection -> {
-            ResultSet rs = connection.createStatement().executeQuery(ALL_SEARCH_QUERY);
+        CriteriaBuilder cb = manager.getCriteriaBuilder();
+        CriteriaQuery<E> cq = cb.createQuery(type);
+        Root<E> root = cq.from(type);
+        CriteriaQuery<E> all = cq.select(root);
+        TypedQuery<E> allQuery = manager.createQuery(all);
 
-            if (checkCompability(rs.getMetaData()))
-                throw new SQLException("Unmatched fields!");
-
-            return extractAllEntities(rs);
-        }).getOrElse(new ArrayList<>());
+        return allQuery.getResultList();
     }
 
     @Override
     public boolean delete(T id) {
 
-        return connectionManager.withConnection(connection -> {
-            PreparedStatement statement = connection.prepareStatement(DELETE_QUERY);
-            statement.setObject(1, id);
+        EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
+        manager.getTransaction().begin();
 
-            return statement.execute();
-        }).getOrElse(false);
+        E entity = manager.find(type, id);
+        manager.remove(entity);
+
+        manager.getTransaction().commit();
+        manager.close();
+
+        return true;
     }
+
+    protected abstract T extractId(E entity);
 
     @Override
     public T save(E entity) {
 
-        return connectionManager.withConnection(connection -> {
-            Statement statement = connection.createStatement();
+        EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
+        manager.getTransaction().begin();
 
-            int affectedRows = statement.executeUpdate(createInsertQuery(entity), Statement.RETURN_GENERATED_KEYS);
+        manager.persist(entity);
 
-            if (affectedRows == 0)
-                throw new SQLException("Creating failed, no rows affected.");
+        manager.getTransaction().commit();
+        manager.close();
 
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-
-                    return (T) generatedKeys.getObject(1);
-                }
-                else {
-                    throw new SQLException("Creating failed, no ID obtained.");
-                }
-            }
-        }).get();
+        return extractId(entity);
     }
 
     @Override
     public boolean update(E entity) {
+        EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
+        manager.getTransaction().begin();
 
-        return connectionManager.withConnection(connection -> {
+        manager.merge(entity);
 
-            int affectedRows = connection
-                    .createStatement()
-                    .executeUpdate(createUpdateQuery(entity));
+        manager.getTransaction().commit();
+        manager.close();
 
-            return affectedRows != 0;
-        }).getOrElse(false);
+        return true;
     }
 
     @Override
     public void createSchema() {
-        connectionManager
-                .withConnection(conn -> conn.createStatement().execute(getCreateSchemaQuery()));
-
+        withTransaction((manager) ->
+                manager.createNativeQuery(getCreateSchemaQuery()).executeUpdate());
     }
 
     @Override
     public void dropSchema() {
-        connectionManager
-                .withConnection(conn -> conn.createStatement().execute(DROP_SCHEMA_QUERY));
+        withTransaction((manager) ->
+                manager.createNativeQuery(getDropSchemaQuery()).executeUpdate());
     }
 
-    protected abstract String createInsertQuery(E entity);
+//    TODO think about it
+    protected <G> G withTransaction(WithTransaction<G> trx) {
+        EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
+        manager.getTransaction().begin();
 
-    protected abstract String createUpdateQuery(E entity);
+        G res = trx.transactional(manager);
+
+        manager.getTransaction().commit();
+        manager.close();
+
+        return res;
+    }
 
     protected abstract String getCreateSchemaQuery();
+    protected abstract String getDropSchemaQuery();
 
 
-    protected List<String> rsFields(ResultSetMetaData metaData) throws SQLException {
-        List<String> fieldNames = new LinkedList<>();
-
-        for (int i = 1; i <= metaData.getColumnCount(); i++)
-            fieldNames.add(metaData.getColumnName(i));
-
-        return fieldNames;
-    }
-
-    protected boolean checkCompability(ResultSetMetaData meta) throws SQLException {
-
-        return (meta.getColumnCount() == fields.size()) &&
-                fields.containsAll(rsFields(meta));
-    }
-
-    protected List<E> extractAllEntities(ResultSet rs) throws SQLException {
-
-        List<E> entities = new LinkedList<>();
-        try {
-            while (rs.next()) {
-                entities.add(extractEntity(rs, fields));
-            }
-        } catch (IllegalAccessException | InstantiationException | NoSuchFieldException e) {
-            e.printStackTrace();
-
-            throw new SQLException("SELECT failed due to invalid data returned!");
-        }
-
-        return entities;
-    }
-
-    private E extractEntity(ResultSet rs) throws SQLException {
-
-        E entity;
-
-        if (!rs.next())
-            return null;
-
-        try {
-            entity = type.newInstance();
-            int fieldCount = rs.getMetaData().getColumnCount();
-
-            for (int i = 1; i <= fieldCount; i++) {
-                Field field = type.getDeclaredField(fields.get(i - 1));
-                field.setAccessible(true);
-                field.set(entity, rs.getObject(i));
-            }
-        } catch (IllegalAccessException | InstantiationException | NoSuchFieldException e) {
-            e.printStackTrace();
-
-            throw new SQLException("SELECT failed due to invalid data returned!");
-        }
-
-        return entity;
-    }
-
-    private E extractEntity(ResultSet rs, List<String> fields) throws SQLException, IllegalAccessException, InstantiationException, NoSuchFieldException {
-
-        E entity = type.newInstance();
-        int fieldCount = rs.getMetaData().getColumnCount();
-
-        for (int i = 1; i <= fieldCount; i++) {
-            Field field = type.getDeclaredField(fields.get(i-1));
-            field.setAccessible(true);
-            field.set(entity, rs.getObject(i));
-        }
-
-        return entity;
+    @FunctionalInterface
+    interface WithTransaction<G> {
+        G transactional(EntityManager manager);
     }
 }

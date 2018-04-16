@@ -23,8 +23,13 @@ public class MoviesServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
 
-        dao.dropSchema();
-        dao.createSchema();
+        try {
+            dao.dropSchema();
+            dao.createSchema();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
         Arrays.asList(
                 new Movie("1", "1", 1, "1", 1.0),
                 new Movie("2", "2", 2, "2", 2.0),
