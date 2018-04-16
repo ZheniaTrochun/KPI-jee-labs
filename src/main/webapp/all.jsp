@@ -22,7 +22,46 @@
                 url: "/MovieList/movies?" + $.param({"id" : id}),
                 type: "DELETE",
                 success: (res) => {
-                    $("#" + id).hide()
+                    $('#' + id).hide()
+                }
+            })
+        }
+
+        const updateOpen = (id) => {
+            $("#update-id").val(id)
+        }
+
+        const update = () => {
+            $.ajax({
+                url: "/MovieList/movies",
+                type: "PUT",
+                data: JSON.stringify({
+                    id: $("#update-id").val(),
+                    name: $("#update-name").val(),
+                    author: $("#update-author").val(),
+                    year: $("#update-year").val(),
+                    genre: $("#update-genre").val(),
+                    imdbScore: $("#update-rating").val()
+                }),
+                success: (res) => {
+                    location.reload()
+                }
+            })
+        }
+
+        const createMovie = () => {
+            $.ajax({
+                url: "/MovieList/movies",
+                type: "POST",
+                data: {
+                    name: $("#insert-name").val(),
+                    author: $("#insert-author").val(),
+                    year: $("#insert-year").val(),
+                    genre: $("#insert-genre").val(),
+                    imdbScore: $("#insert-rating").val()
+                },
+                success: (res) => {
+                    location.reload()
                 }
             })
         }
@@ -47,7 +86,7 @@
         </thead>
         <tbody>
         <%
-            List<Movie> result= (List<Movie>) request.getAttribute("allMovies");
+            List<Movie> result= (List) request.getAttribute("allMovies");
             Iterator it = result.iterator();
             while(it.hasNext()){
                 Movie movie = (Movie) it.next();
@@ -58,26 +97,106 @@
                 out.println(String.format("<td>%s</td>", movie.getGenre()));
                 out.println(String.format("<td>%d</td>", movie.getYear()));
                 out.println(String.format("<td>%f</td>", movie.getImdbScore()));
-                out.println(String.format("<td><button class=\"btn btn-danger\" onclick=\"deleteMovie(%d)\">Delete</button><button class=\"btn btn-warning\" onclick=update(%d)>Update</button></td>", movie.getId(), movie.getId()));
+                out.println(String.format("<td><button class=\"btn btn-danger\" onclick=\"deleteMovie(%d)\">Delete</button>", movie.getId()));
+                out.println(String.format("<button class=\"btn btn-warning\" data-toggle=\"modal\" data-target=\"#updateModal\" onclick=updateOpen(%d)>Update</button></td>", movie.getId()));
                 out.println("</tr>");
             }
         %>
         </tbody>
     </table>
 
-    <form method="post" action="movies">
-        <br>
-        <input type="hidden" name="method" value="put">
-        <input type="number" name="id" placeholder="id">
-        <input type="text" name="name" placeholder="name">
-        <input type="text" name="genre" placeholder="genre">
-        <input type="number" name="year" placeholder="year">
-        <input type="text" name="author" placeholder="author">
-        <input type="number" name="imdbScore" placeholder="imdbScore">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <button class="btn btn-success" data-toggle="modal" data-target="#insertModal">Create new</button>
+        </div>
+    </div>
 
-        <br><br>
-        <input type="submit" value="update">
-    </form>
+    <!-- Modal -->
+    <div id="updateModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Movie</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="update-id">Id: </label>
+                        <input type="number" class="form-control" disabled id="update-id" name="id" placeholder="id">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-name">Name: </label>
+                        <input type="text" name="name" class="form-control" id="update-name" placeholder="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-genre">Genre: </label>
+                        <input type="text" name="genre" class="form-control" id="update-genre" placeholder="genre">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-year">Year: </label>
+                        <input type="number" name="year" class="form-control" id="update-year" placeholder="year">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-author">Author: </label>
+                        <input type="text" name="author" id="update-author" class="form-control" placeholder="author">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-rating">Imdb Rating: </label>
+                        <input type="number" name="imdbScore" class="form-control" id="update-rating" placeholder="imdbScore">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-warning" onclick="update()">Update</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="insertModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Create Movie</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="update-name">Name: </label>
+                        <input type="text" name="name" class="form-control" id="insert-name" placeholder="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-genre">Genre: </label>
+                        <input type="text" name="genre" class="form-control" id="insert-genre" placeholder="genre">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-year">Year: </label>
+                        <input type="number" name="year" class="form-control" id="insert-year" placeholder="year">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-author">Author: </label>
+                        <input type="text" name="author" id="insert-author" class="form-control" placeholder="author">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-rating">Imdb Rating: </label>
+                        <input type="number" name="imdbScore" class="form-control" id="insert-rating" placeholder="imdbScore">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" onclick="createMovie()">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
 </div>
 </body>
 </html>

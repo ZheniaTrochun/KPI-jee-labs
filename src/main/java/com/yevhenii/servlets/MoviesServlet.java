@@ -1,5 +1,6 @@
 package com.yevhenii.servlets;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yevhenii.dao.MovieDao;
 import com.yevhenii.model.Movie;
 
@@ -11,11 +12,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @WebServlet(name = "movieServlet", urlPatterns = "/movies")
 public class MoviesServlet extends HttpServlet {
 
     private final MovieDao dao = MovieDao.getInstance();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Override
     public void init() throws ServletException {
@@ -44,25 +47,11 @@ public class MoviesServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Movie movie = constructMovie(req);
 
-        String method = req.getParameter("method");
+        System.out.println("Movie to create: " + movie);
 
-        if ("put".equalsIgnoreCase(method)) {
-//            PUT request
-            Movie movie = constructMovie(req);
-            movie.setId(new Integer(req.getParameter("id")));
-            dao.update(movie);
-        } else if ("delete".equalsIgnoreCase(method)) {
-//            DELETE request
-            Integer id = new Integer(req.getParameter("id"));
-            dao.delete(id);
-        } else {
-//            actual POST
-            dao.save(constructMovie(req));
-        }
-
-//        reload page after any update
-        doGet(req, resp);
+        dao.save(movie);
     }
 
     private Movie constructMovie(HttpServletRequest req) {
@@ -75,29 +64,25 @@ public class MoviesServlet extends HttpServlet {
         return new Movie(name, author, year, genre, imdbScore);
     }
 
-//    @Override
-//    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        Integer id = new Integer(req.getParameter("id"));
-//        String name = req.getParameter("name");
-//        String author = req.getParameter("author");
-//        String genre = req.getParameter("genre");
-//        Integer year = new Integer(req.getParameter("year"));
-//        Double imdbScore = new Double(req.getParameter("imdbScore"));
-//
-//        Movie movie = new Movie(id, name, author, year, genre, imdbScore);
-//
-//        dao.update(movie);
-//
-//        doGet(req, resp);
-//    }
-//
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        Movie movie = MAPPER.readValue(req.getReader()
+                    .lines()
+                    .collect(Collectors.joining()),
+                Movie.class);
+
+        System.out.println("movie to update: " + movie);
+
+        dao.update(movie);
+    }
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
         Integer id = new Integer(req.getParameter("id"));
 
-        dao.delete(id);
+        System.out.println("Movie to delete id: " + id);
 
-        doGet(req, resp);
+        dao.delete(id);
     }
 }
