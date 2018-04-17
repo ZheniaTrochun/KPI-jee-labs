@@ -1,17 +1,9 @@
 package com.yevhenii.dao;
 
 import com.yevhenii.dao.abstraction.PaginatedDao;
-import com.yevhenii.dao.connection.ConnectionManager;
-import com.yevhenii.dao.connection.ConnectionManagerImpl;
 import com.yevhenii.model.Movie;
 
 import javax.persistence.EntityManagerFactory;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Singleton

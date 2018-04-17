@@ -1,7 +1,5 @@
 package com.yevhenii.dao;
 
-import com.yevhenii.dao.connection.ConnectionManager;
-import com.yevhenii.dao.connection.ConnectionManagerImpl;
 import com.yevhenii.model.Movie;
 import org.junit.After;
 import org.junit.Assert;
