@@ -1,17 +1,16 @@
 package com.yevhenii.jsf;
 
 
-//import javax.faces.bean.ManagedBean;
-//import javax.faces.bean.ViewScoped;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
 
 import com.yevhenii.dao.MovieDao;
 import com.yevhenii.model.Movie;
 
-import java.util.Arrays;
 import java.util.List;
 
-//@ManagedBean(name = "helloWorld", eager = true)
-//@ViewScoped
+@ManagedBean(name = "movieBean", eager = true)
+@SessionScoped
 public class MovieBean {
 
     private final MovieDao dao = MovieDao.getInstance();
