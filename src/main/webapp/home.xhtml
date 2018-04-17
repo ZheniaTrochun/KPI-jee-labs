@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+<h:head>
+    <title>JSF Tutorial!</title>
+
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" language="JavaScript" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous" language="JavaScript" type="text/javascript"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous" language="JavaScript" type="text/javascript"></script>
+    <script type="text/javascript" language="JavaScript">
+        function openUpdateModal(id) {
+            console.log(id);
+            // $("#modal-form:update-id").val(id)
+            document.getElementById('modal-form:update-id').value=id;
+            document.getElementById('modal-form:update-id-hidden').value=id;
+
+            return function (name) {
+                document.getElementById('modal-form:update-name').value=name;
+
+                return function (genre) {
+                    document.getElementById('modal-form:update-genre').value=genre;
+
+                    return function (year) {
+                        document.getElementById('modal-form:update-year').value=year;
+
+                        return function (author) {
+                            document.getElementById('modal-form:update-author').value=author;
+
+                            return function (rating) {
+                                document.getElementById('modal-form:update-rating').value=rating;
+                                $("#updateModal").modal('show');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function closeUpdate() {
+            $("#updateModal").modal('toggle')
+        }
+
+        function closeCreate() {
+            $("#insertModal").modal('toggle')
+        }
+    </script>
+
+    <style type="text/css">
+        .show {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <div class="container">
+
+        <h1>
+            Available Movies
+        </h1>
+
+        <h:dataTable value="#{movieBean.getAll()}" var="movie" id="main-table"
+                     styleClass="table">
+
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Id"/>
+                </f:facet>
+                <h:outputText value="#{movie.id}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Name"/>
+                </f:facet>
+                <h:outputText value="#{movie.name}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Author"/>
+                </f:facet>
+                <h:outputText value="#{movie.author}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Year"/>
+                </f:facet>
+                <h:outputText value="#{movie.year}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Genre"/>
+                </f:facet>
+                <h:outputText value="#{movie.genre}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="ImdbScore"/>
+                </f:facet>
+                <h:outputText value="#{movie.imdbScore}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Actions"/>
+                </f:facet>
+
+                <h:form>
+                    <h:commandButton id="btn" class="btn btn-danger" value="Delete" action="#{movieBean.delete(movie.id)}" type="submit">
+                        <f:ajax  render="main-table" />
+                    </h:commandButton>
+                </h:form>
+
+                <button class="btn btn-warning" onclick="openUpdateModal(#{movie.id})('#{movie.name}')('#{movie.genre}')(#{movie.year})('#{movie.author}')(#{movie.imdbScore})" data-toggle="modal" data-target="updateModal">Update</button>
+
+            </h:column>
+
+        </h:dataTable>
+
+
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <button class="btn btn-success" data-toggle="modal" data-target="#insertModal">Create new</button>
+            </div>
+        </div>
+
+
+
+        <!-- Modal -->
+        <!--@elvariable id="id" type="java.lang.Integer"-->
+        <!--@elvariable id="name" type="java.lang.String"-->
+        <!--@elvariable id="genre" type="java.lang.String"-->
+        <!--@elvariable id="year" type="java.lang.Integer"-->
+        <!--@elvariable id="author" type="java.lang.String"-->
+        <!--@elvariable id="rating" type="java.lang.Double"-->
+        <div id="updateModal" class="modal">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <h:form id="modal-form">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Update Movie</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="form-group">
+                                <label for="update-id">Id: </label>
+                                <h:inputHidden type="text" class="form-control" id="update-id-hidden" value="#{id}" name="id" placeholder="id" />
+                                <h:inputText type="number" class="form-control" id="update-id" readonly="true" name="id" placeholder="id" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-name">Name: </label>
+                                <h:inputText type="text" name="name" class="form-control"  value="#{name}" id="update-name" placeholder="name" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-genre">Genre: </label>
+                                <h:inputText type="text" name="genre" class="form-control" value="#{genre}" id="update-genre" placeholder="genre" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-year">Year: </label>
+                                <h:inputText type="number" name="year" class="form-control" value="#{year}" id="update-year" placeholder="year" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-author">Author: </label>
+                                <h:inputText type="text" name="author" id="update-author" value="#{author}" class="form-control" placeholder="author" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-rating">Imdb Rating: </label>
+                                <h:inputText type="number" name="imdbScore" class="form-control" value="#{rating}" id="update-rating" placeholder="imdbScore" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <h:commandButton class="btn btn-warning" value="Update" action="#{movieBean.update(id, name, genre, year, author, rating)}" onclick="closeUpdate()">
+                                <f:ajax execute="modal-form" render="main-table" />
+                            </h:commandButton>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </h:form>
+                </div>
+
+            </div>
+        </div>
+
+        <!--@elvariable id="insertName" type="java.lang.String"-->
+        <!--@elvariable id="insertGenre" type="java.lang.String"-->
+        <!--@elvariable id="insertYear" type="java.lang.Integer"-->
+        <!--@elvariable id="insertAuthor" type="java.lang.String"-->
+        <!--@elvariable id="insertRating" type="java.lang.Double"-->
+        <div id="insertModal" class="modal">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <h:form id="insert-modal-form">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Create Movie</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="form-group">
+                                <label for="update-name">Name: </label>
+                                <h:inputText type="text" name="name" class="form-control"  value="#{insertName}" id="insertName" placeholder="name" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-genre">Genre: </label>
+                                <h:inputText type="text" name="genre" class="form-control" value="#{insertGenre}" id="insertGenre" placeholder="genre" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-year">Year: </label>
+                                <h:inputText type="number" name="year" class="form-control" value="#{insertYear}" id="insertYear" placeholder="year" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-author">Author: </label>
+                                <h:inputText type="text" name="author" id="insertAuthor" value="#{insertAuthor}" class="form-control" placeholder="author" />
+                            </div>
+                            <div class="form-group">
+                                <label for="update-rating">Imdb Rating: </label>
+                                <h:inputText type="number" name="imdbScore" class="form-control" value="#{insertRating}" id="insertRating" placeholder="imdbScore" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <h:commandButton class="btn btn-success" value="Create" action="#{movieBean.create(insertName, insertGenre, insertYear, insertAuthor, insertRating)}" onclick="closeCreate()">
+                                <f:ajax execute="insert-modal-form" render="main-table" />
+                            </h:commandButton>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </h:form>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+
+</h:body>
+</html>
