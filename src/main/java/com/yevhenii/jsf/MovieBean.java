@@ -13,8 +13,8 @@ import com.yevhenii.services.MovieService;
 
 import java.util.List;
 
-@ManagedBean(name = "movieBean", eager = true)
-@SessionScoped
+//@ManagedBean(name = "movieBean", eager = true)
+//@SessionScoped
 public class MovieBean {
 
 //    private final Movieservice service = Movieservice.getInstance();
