@@ -51,12 +51,10 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     public boolean delete(T id) {
 
         EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
-        manager.getTransaction().begin();
 
         E entity = manager.find(type, id);
         manager.remove(entity);
 
-        manager.getTransaction().commit();
         manager.close();
 
         return true;
@@ -68,11 +66,7 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     public T save(E entity) {
 
         EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
-        manager.getTransaction().begin();
-
         manager.persist(entity);
-
-        manager.getTransaction().commit();
         manager.close();
 
         return extractId(entity);
@@ -81,11 +75,9 @@ public abstract class AbstractDao<E, T> implements Dao<E, T> {
     @Override
     public boolean update(E entity) {
         EntityManager manager = ENTITY_MANAGER_FACTORY.createEntityManager();
-        manager.getTransaction().begin();
 
         manager.merge(entity);
 
-        manager.getTransaction().commit();
         manager.close();
 
         return true;

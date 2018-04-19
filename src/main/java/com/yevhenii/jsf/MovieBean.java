@@ -1,11 +1,13 @@
 package com.yevhenii.jsf;
 
 
+import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 
 import com.yevhenii.dao.MovieDao;
 import com.yevhenii.model.Movie;
+import com.yevhenii.services.MovieService;
 
 import java.util.List;
 
@@ -13,27 +15,30 @@ import java.util.List;
 @SessionScoped
 public class MovieBean {
 
-    private final MovieDao dao = MovieDao.getInstance();
+//    private final MovieDao dao = MovieDao.getInstance();
+
+    @EJB
+    private MovieService service;
 
     public MovieBean() {
     }
 
 
     public List<Movie> getAll() {
-        return dao.findAll();
+        return service.getAll();
     }
 
     public void delete(Integer id) {
-        dao.delete(id);
+        service.delete(id);
     }
 
     public void update(Integer id, String name, String genre, Integer year, String author, Double rating) {
         Movie movie = new Movie(id, name, author, year, genre, rating);
-        dao.update(movie);
+        service.update(movie);
     }
 
     public void create(String name, String genre, Integer year, String author, Double rating) {
         Movie movie = new Movie(name, author, year, genre, rating);
-        dao.save(movie);
+        service.save(movie);
     }
 }
