@@ -114,6 +114,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.glassfish.soteria</groupId>
+            <artifactId>javax.security.enterprise</artifactId>
+            <version>1.0</version> <!-- Stable version -->
+        </dependency>
+
 
     </dependencies>
 
