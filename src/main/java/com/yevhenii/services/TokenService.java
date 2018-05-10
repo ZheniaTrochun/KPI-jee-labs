@@ -10,9 +10,7 @@ import jdk.nashorn.internal.runtime.options.Option;
 
 import javax.ejb.*;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Optional;
@@ -22,11 +20,14 @@ import java.util.UUID;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TokenService {
 
-    @PersistenceContext
-    private EntityManager manager;
+//    @PersistenceContext
+//    private EntityManager manager;
+
+    @PersistenceUnit
+    private EntityManagerFactory factory;
 
     @Inject
-    @HashAlgorithm(algorithm = Algorithm.SHA256)
+//    @HashAlgorithm(algorithm = Algorithm.SHA256)
     private HashGenerator tokenHasher;
 
     @Inject
@@ -49,7 +50,7 @@ public class TokenService {
 
         token.setUser(user);
 
-        manager.persist(token);
+        factory.createEntityManager().persist(token);
     }
 
     public String generate(String username, String ipAddress, String description) {
@@ -66,7 +67,8 @@ public class TokenService {
 
         try {
 
-            return Optional.of(manager.createNamedQuery("select t from Token t where t.tokenHash = :token", Token.class)
+            return Optional.of(factory.createEntityManager()
+                    .createNamedQuery("select t from Token t where t.tokenHash = :token", Token.class)
                     .setParameter("tokenHash", token)
                     .getSingleResult());
         } catch (NoResultException e) {
@@ -77,7 +79,8 @@ public class TokenService {
     }
 
     public void remove(String token) {
-        manager.createNamedQuery("delete from Token t where t.tokenHash = :tokenHash", Token.class)
+        factory.createEntityManager()
+                .createNamedQuery("delete from Token t where t.tokenHash = :tokenHash", Token.class)
                 .setParameter("tokenHash", token)
                 .executeUpdate();
     }

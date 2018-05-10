@@ -7,25 +7,24 @@ import com.yevhenii.security.HashGenerator;
 
 import javax.ejb.*;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.swing.text.html.Option;
+import javax.persistence.*;
 import java.util.Optional;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class UserService {
 
-    @PersistenceContext
-    private EntityManager manager;
+//    @PersistenceContext(name = "Movie")
+//    private EntityManager manager;
+    @PersistenceUnit
+    private EntityManagerFactory factory;
 
     @Inject
-    @HashAlgorithm(algorithm = Algorithm.SHA256)
+//    @HashAlgorithm(algorithm = Algorithm.SHA256)
     private HashGenerator tokenHasher;
 
     @Inject
-    @HashAlgorithm(algorithm = Algorithm.SHA256)
+//    @HashAlgorithm(algorithm = Algorithm.SHA256)
     private HashGenerator passHasher;
 
 
@@ -38,14 +37,15 @@ public class UserService {
 
         User user = new User(username, hashedPass);
 
-        manager.persist(user);
+        factory.createEntityManager().persist(user);
     }
 
     public Optional<User> getByUsername(String username) {
 
         try {
             return Optional.of(
-                    manager.createNamedQuery("select a from Account a where a.username = :username", User.class)
+                    factory.createEntityManager()
+                            .createNamedQuery("select a from Account a where a.username = :username", User.class)
                             .setParameter("username", username)
                             .getSingleResult());
         } catch (NoResultException e) {
@@ -55,7 +55,8 @@ public class UserService {
 
     public User getByUsernameAndPassword(String username, String password) {
 
-        return manager.createNamedQuery(
+        return factory.createEntityManager()
+                .createNamedQuery(
                     "select a from Account a where a.username = :username and a.password = :password", User.class)
                 .setParameter("username", username)
                 .setParameter("password", passHasher.getHashedText(password))

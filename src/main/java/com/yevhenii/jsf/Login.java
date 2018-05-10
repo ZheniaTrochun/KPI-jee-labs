@@ -38,6 +38,8 @@ public class Login {
                         .rememberMe(true)
         );
 
+        System.out.println("status = " + status.toString());
+
         if (status.equals(AuthenticationStatus.SUCCESS)) {
             redirect("index.xhtml");
         } else if (status.equals(AuthenticationStatus.SEND_FAILURE)) {

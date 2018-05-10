@@ -18,9 +18,9 @@ import java.util.Set;
 @WebFilter(urlPatterns = {"/*"})
 public class AuthenticationFilter extends HttpFilter {
 
-    private static final Set<String> ALLOWED_PATHS = Collections.unmodifiableSet(new HashSet<>(
-            Arrays.asList("/login.xhtml", "/register.xhtml")
-    ));
+    private static final Set<String> ALLOWED_PATHS = new HashSet<>(
+            Arrays.asList("/login.xhtml", "/register.xhtml", "/MovieList/login.xhtml", "/MovieList/register.xhtml")
+    );
 
     @Override
     public void doFilter(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
@@ -31,11 +31,18 @@ public class AuthenticationFilter extends HttpFilter {
         String path = httpServletRequest.getRequestURI().substring(httpServletRequest.getContextPath().length())
                 .replaceAll("[/]+$", "");
 
-        boolean loggedIn = Objects.isNull(httpServletRequest.getRemoteUser());
+        boolean loggedIn = !Objects.isNull(httpServletRequest.getRemoteUser());
         boolean loginRequest = httpServletRequest.getRequestURI().equals(loginUrl);
         boolean resourceRequest = Servlets.isFacesResourceRequest(httpServletRequest);
 
         boolean isAllowed = ALLOWED_PATHS.contains(path);
+
+        System.out.println("====================");
+        System.out.println(loggedIn);
+        System.out.println(loginRequest);
+        System.out.println(resourceRequest);
+        System.out.println(isAllowed);
+        System.out.println("====================");
 
         if (loggedIn || loginRequest || resourceRequest || isAllowed) {
             if (!resourceRequest) {
