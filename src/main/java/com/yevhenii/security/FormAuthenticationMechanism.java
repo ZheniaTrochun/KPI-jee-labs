@@ -1,5 +1,6 @@
 package com.yevhenii.security;
 
+import javax.faces.bean.ApplicationScoped;
 import javax.inject.Inject;
 import javax.security.enterprise.AuthenticationException;
 import javax.security.enterprise.AuthenticationStatus;
@@ -18,15 +19,15 @@ import java.util.Objects;
         isRememberMeExpression = "#{self.isRememberMe(httpMessageContext)}"
 )
 @LoginToContinue(
-        loginPage = "/login.xhtml",
+        loginPage = "/login.xhtml?continue=true",
         errorPage = "",
         useForwardToLogin = false // think about this
 )
+@ApplicationScoped
 public class FormAuthenticationMechanism implements HttpAuthenticationMechanism {
 
     @Inject
     private IdentityStore identityStore;
-
 
     @Override
     public AuthenticationStatus validateRequest(HttpServletRequest httpServletRequest,
@@ -34,7 +35,11 @@ public class FormAuthenticationMechanism implements HttpAuthenticationMechanism 
                                                 HttpMessageContext httpMessageContext)
             throws AuthenticationException {
 
+        System.out.println("validate request");
+
         Credential credential = httpMessageContext.getAuthParameters().getCredential();
+
+        System.out.println("credential is null = " + Objects.isNull(credential));
 
         if (Objects.isNull(credential)) {
             return httpMessageContext.doNothing();
@@ -45,8 +50,9 @@ public class FormAuthenticationMechanism implements HttpAuthenticationMechanism 
 
     public Boolean isRememberMe(HttpMessageContext httpMessageContext) {
 
-//        return httpMessageContext.getAuthParameters().isRememberMe();
-        return true;
+        System.out.println("is remember me");
+        return httpMessageContext.getAuthParameters().isRememberMe();
+//        return false;
     }
 
     @Override

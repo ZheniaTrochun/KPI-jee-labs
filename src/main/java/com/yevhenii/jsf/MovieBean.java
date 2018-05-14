@@ -4,6 +4,7 @@ package com.yevhenii.jsf;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.inject.Inject;
 
 import com.yevhenii.dao.MovieDao;
 import com.yevhenii.model.Movie;
@@ -17,7 +18,8 @@ public class MovieBean {
 
 //    private final MovieDao dao = MovieDao.getInstance();
 
-    @EJB
+//    @EJB
+    @Inject
     private MovieService service;
 
     public MovieBean() {

@@ -17,20 +17,13 @@ import java.util.Optional;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class UserService {
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "Movie")
     private EntityManager manager;
 
-    @Inject
-    @HashAlgorithm(algorithm = Algorithm.SHA256)
-    private HashGenerator tokenHasher;
+    private HashGenerator tokenHasher = new HashGenerator(Algorithm.SHA256.getAlgorithmName());
 
-    @Inject
-    @HashAlgorithm(algorithm = Algorithm.SHA256)
-    private HashGenerator passHasher;
+    private HashGenerator passHasher = new HashGenerator(Algorithm.SHA256.getAlgorithmName());
 
-
-//    @Inject
-//    private TokenService tokenService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void register(String username, String password) {
@@ -45,7 +38,7 @@ public class UserService {
 
         try {
             return Optional.of(
-                    manager.createNamedQuery("select a from Account a where a.username = :username", User.class)
+                    manager.createNamedQuery("select a from User a where a.username = :username", User.class)
                             .setParameter("username", username)
                             .getSingleResult());
         } catch (NoResultException e) {
@@ -56,9 +49,10 @@ public class UserService {
     public User getByUsernameAndPassword(String username, String password) {
 
         return manager.createNamedQuery(
-                    "select a from Account a where a.username = :username and a.password = :password", User.class)
+                    "select a from User a where a.username = :username and a.password = :password", User.class)
                 .setParameter("username", username)
                 .setParameter("password", passHasher.getHashedText(password))
+//                .setParameter("password", password)
                 .getSingleResult();
     }
 }

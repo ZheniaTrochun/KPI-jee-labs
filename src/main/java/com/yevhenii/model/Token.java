@@ -14,7 +14,7 @@ import static java.time.temporal.ChronoUnit.MONTHS;
 public class Token implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull

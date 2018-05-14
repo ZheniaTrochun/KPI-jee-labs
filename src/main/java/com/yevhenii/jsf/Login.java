@@ -1,5 +1,7 @@
 package com.yevhenii.jsf;
 
+import org.omnifaces.cdi.Param;
+
 import javax.enterprise.inject.Model;
 import javax.inject.Inject;
 import javax.security.enterprise.AuthenticationStatus;
@@ -11,19 +13,24 @@ import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.Serializable;
 
 import static javax.security.enterprise.authentication.mechanism.http.AuthenticationParameters.withParams;
 import static org.omnifaces.util.Faces.*;
 import static org.omnifaces.util.Messages.addGlobalError;
 
 @Model
-public class Login {
+public class Login implements Serializable {
 
     private String username;
     private String password;
 
     @Inject
     private SecurityContext securityContext;
+
+    @Inject
+    @Param(name = "continue") // Defined in @LoginToContinue of SecurityFormAuthenticationMechanism
+    private boolean loginToContinue;
 
     public void submit() throws IOException {
 
@@ -34,15 +41,19 @@ public class Login {
                 getResponse(),
                 withParams()
                         .credential(credential)
-                        .newAuthentication(false)
-                        .rememberMe(true)
+                        .newAuthentication(!loginToContinue)
+                        .rememberMe(false)
         );
 
-        if (status.equals(AuthenticationStatus.SUCCESS)) {
-            redirect("index.xhtml");
-        } else if (status.equals(AuthenticationStatus.SEND_FAILURE)) {
-            addGlobalError("auth.message.error.failure");
-            validationFailed();
+        if (status != null) {
+            System.out.println(status.toString());
+
+            if (status.equals(AuthenticationStatus.SUCCESS)) {
+                redirect("index.xhtml");
+            } else if (status.equals(AuthenticationStatus.SEND_FAILURE)) {
+                addGlobalError("auth.message.error.failure");
+                validationFailed();
+            }
         }
     }
 

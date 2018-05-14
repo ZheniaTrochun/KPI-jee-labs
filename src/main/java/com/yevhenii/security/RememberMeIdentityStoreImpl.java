@@ -31,6 +31,8 @@ public class RememberMeIdentityStoreImpl implements RememberMeIdentityStore {
     @Override
     public CredentialValidationResult validate(RememberMeCredential rememberMeCredential) {
 
+        System.out.println("remember me validate");
+
         return tokenService.getByRawToken(rememberMeCredential.getToken())
                 .map(token1 -> new CredentialValidationResult(new CallerPrincipal(token1.getUser().getUsername())))
                 .orElse(CredentialValidationResult.INVALID_RESULT);

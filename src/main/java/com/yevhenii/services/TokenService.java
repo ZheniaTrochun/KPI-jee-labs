@@ -19,20 +19,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Stateless
-@TransactionManagement(TransactionManagementType.CONTAINER)
 public class TokenService {
 
     @PersistenceContext
-    private EntityManager manager;
+    EntityManager manager;
+
+    HashGenerator tokenHasher = new HashGenerator(Algorithm.SHA256.getAlgorithmName());
 
     @Inject
-    @HashAlgorithm(algorithm = Algorithm.SHA256)
-    private HashGenerator tokenHasher;
+    UserService userService;
 
-    @Inject
-    private UserService userService;
-
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     private void save(String rawToken, String username, String ipAddress,
                       String description, Instant expiration) {
 

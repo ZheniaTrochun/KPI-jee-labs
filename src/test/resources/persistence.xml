@@ -5,7 +5,7 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
    http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
-    <persistence-unit name="Movies" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="Movies" transaction-type="JTA">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
         <class>com.yevhenii.model.Movie</class>

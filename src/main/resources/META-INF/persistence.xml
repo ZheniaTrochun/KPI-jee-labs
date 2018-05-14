@@ -5,9 +5,14 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
    http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
-    <persistence-unit name="Movie" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="Movie" transaction-type="JTA">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+
         <class>com.yevhenii.model.Movie</class>
+        <class>com.yevhenii.model.User</class>
+        <class>com.yevhenii.model.Token</class>
+
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
         <properties>
             <property name="javax.persistence.jdbc.url" value="jdbc:h2:~/test"/>
@@ -19,4 +24,5 @@
         </properties>
 
     </persistence-unit>
+
 </persistence>
