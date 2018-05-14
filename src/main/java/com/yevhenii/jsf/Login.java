@@ -2,8 +2,12 @@ package com.yevhenii.jsf;
 
 import org.omnifaces.cdi.Param;
 
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Model;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.security.enterprise.AuthenticationStatus;
 import javax.security.enterprise.SecurityContext;
 import javax.security.enterprise.authentication.mechanism.http.AuthenticationParameters;
@@ -15,46 +19,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
 
-import static javax.security.enterprise.authentication.mechanism.http.AuthenticationParameters.withParams;
-import static org.omnifaces.util.Faces.*;
-import static org.omnifaces.util.Messages.addGlobalError;
-
-@Model
+@Named
+@RequestScoped
 public class Login implements Serializable {
 
     private String username;
     private String password;
 
-    @Inject
-    private SecurityContext securityContext;
+    public void login() throws IOException {
 
-    @Inject
-    @Param(name = "continue") // Defined in @LoginToContinue of SecurityFormAuthenticationMechanism
-    private boolean loginToContinue;
-
-    public void submit() throws IOException {
-
-        Credential credential = new UsernamePasswordCredential(username, new Password(password));
-
-        AuthenticationStatus status = securityContext.authenticate(
-                getRequest(),
-                getResponse(),
-                withParams()
-                        .credential(credential)
-                        .newAuthentication(!loginToContinue)
-                        .rememberMe(false)
-        );
-
-        if (status != null) {
-            System.out.println(status.toString());
-
-            if (status.equals(AuthenticationStatus.SUCCESS)) {
-                redirect("index.xhtml");
-            } else if (status.equals(AuthenticationStatus.SEND_FAILURE)) {
-                addGlobalError("auth.message.error.failure");
-                validationFailed();
-            }
-        }
+        ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+        externalContext.redirect("home.jsf");
     }
 
     public String getUsername() {

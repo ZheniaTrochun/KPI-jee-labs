@@ -1,16 +1,11 @@
 package com.yevhenii.services;
 
 import com.yevhenii.model.User;
-import com.yevhenii.security.Algorithm;
-import com.yevhenii.security.HashAlgorithm;
-import com.yevhenii.security.HashGenerator;
 
 import javax.ejb.*;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Stateless
@@ -20,16 +15,11 @@ public class UserService {
     @PersistenceContext(unitName = "Movie")
     private EntityManager manager;
 
-    private HashGenerator tokenHasher = new HashGenerator(Algorithm.SHA256.getAlgorithmName());
-
-    private HashGenerator passHasher = new HashGenerator(Algorithm.SHA256.getAlgorithmName());
-
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void register(String username, String password) {
-        String hashedPass = passHasher.getHashedText(password);
 
-        User user = new User(username, hashedPass);
+        User user = new User(username, password);
 
         manager.persist(user);
     }
@@ -38,7 +28,8 @@ public class UserService {
 
         try {
             return Optional.of(
-                    manager.createNamedQuery("select a from User a where a.username = :username", User.class)
+                    manager.createQuery("select a from User a where a.username = :username", User.class)
+//                    manager.createNamedQuery("select a from User a where a.username = :username", User.class)
                             .setParameter("username", username)
                             .getSingleResult());
         } catch (NoResultException e) {
@@ -48,11 +39,10 @@ public class UserService {
 
     public User getByUsernameAndPassword(String username, String password) {
 
-        return manager.createNamedQuery(
+        return manager.createQuery(
                     "select a from User a where a.username = :username and a.password = :password", User.class)
                 .setParameter("username", username)
-                .setParameter("password", passHasher.getHashedText(password))
-//                .setParameter("password", password)
+                .setParameter("password", password)
                 .getSingleResult();
     }
 }

@@ -2,15 +2,14 @@ package com.yevhenii.jsf;
 
 import com.yevhenii.services.UserService;
 
-import javax.enterprise.inject.Model;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletResponse;
+import javax.inject.Named;
 
 import static org.omnifaces.util.Messages.addGlobalInfo;
 
-@Model
+@Named
+@RequestScoped
 public class Register {
 
     private String username;
@@ -19,10 +18,8 @@ public class Register {
     @Inject
     private UserService userService;
 
-//    @Inject
-//    private HttpServletResponse response;
-
     public void submit() {
+        System.out.println("register");
         userService.register(username, password);
         System.out.println("REGISTERED but I don't know what to do next :(");
         addGlobalInfo("register.message.success");
