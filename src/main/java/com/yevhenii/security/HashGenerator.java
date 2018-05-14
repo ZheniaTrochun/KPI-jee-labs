@@ -9,7 +9,7 @@ import java.util.Base64;
 @Stateless
 public class HashGenerator {
 
-    private String algo;
+    private String algo = "SHA-256";
 
     public HashGenerator() {
     }
