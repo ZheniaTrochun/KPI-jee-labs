@@ -29,7 +29,7 @@ public class Login implements Serializable {
     public void login() throws IOException {
 
         ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
-        externalContext.redirect("home.jsf");
+        externalContext.redirect("movies.html");
     }
 
     public String getUsername() {

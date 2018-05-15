@@ -7,7 +7,7 @@
          id = "WebApp_ID" version="2.5">
 
     <welcome-file-list>
-        <welcome-file>login.jsf</welcome-file>
+        <welcome-file>movies.html</welcome-file>
     </welcome-file-list>
 
     <!--
@@ -15,57 +15,39 @@
        It acts as central controller.
        This servlet initializes the JSF components before the JSP is displayed.
     -->
+    <!--<security-constraint>-->
+        <!--<web-resource-collection>-->
+            <!--<web-resource-name>Movies</web-resource-name>-->
+            <!--<url-pattern>/movies.html</url-pattern>-->
+        <!--</web-resource-collection>-->
+        <!--<auth-constraint>-->
+            <!--<role-name>user</role-name>-->
+        <!--</auth-constraint>-->
+    <!--</security-constraint>-->
 
-    <servlet>
-        <servlet-name>Faces Servlet</servlet-name>
-        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    <!--<security-constraint>-->
+        <!--<display-name>Restrict direct access to XHTML files</display-name>-->
+        <!--<web-resource-collection>-->
+            <!--<web-resource-name>XHTML files</web-resource-name>-->
+            <!--<url-pattern>*.xhtml</url-pattern>-->
+        <!--</web-resource-collection>-->
+        <!--<auth-constraint/>-->
+    <!--</security-constraint>-->
 
-    <servlet-mapping>
-        <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>/faces/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.jsf</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.faces</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.xhtml</url-pattern>
-    </servlet-mapping>
-
-    <security-constraint>
-        <web-resource-collection>
-            <web-resource-name>Home</web-resource-name>
-            <url-pattern>/home.jsf</url-pattern>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>foo</role-name>
-        </auth-constraint>
-    </security-constraint>
-
-    <security-constraint>
-        <display-name>Restrict direct access to XHTML files</display-name>
-        <web-resource-collection>
-            <web-resource-name>XHTML files</web-resource-name>
-            <url-pattern>*.xhtml</url-pattern>
-        </web-resource-collection>
-        <auth-constraint/>
-    </security-constraint>
+    <!--<security-constraint>-->
+        <!--<display-name>Restrict direct access to HTML files</display-name>-->
+        <!--<web-resource-collection>-->
+            <!--<web-resource-name>HTML files</web-resource-name>-->
+            <!--<url-pattern>*.html</url-pattern>-->
+        <!--</web-resource-collection>-->
+        <!--<auth-constraint/>-->
+    <!--</security-constraint>-->
 
 
-    <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
-    </session-config>
+    <!--<session-config>-->
+        <!--<session-timeout>-->
+            <!--30-->
+        <!--</session-timeout>-->
+    <!--</session-config>-->
 
 </web-app>

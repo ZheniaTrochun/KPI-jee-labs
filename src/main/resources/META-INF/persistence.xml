@@ -10,7 +10,6 @@
 
         <class>com.yevhenii.model.Movie</class>
         <class>com.yevhenii.model.User</class>
-        <class>com.yevhenii.model.Token</class>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 

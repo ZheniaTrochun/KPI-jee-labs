@@ -1,12 +1,12 @@
 package com.yevhenii.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "movie", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name", "author", "year"})
+})
 public class Movie {
 
     @Id

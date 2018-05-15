@@ -9,6 +9,7 @@ import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 import static javax.security.enterprise.identitystore.CredentialValidationResult.INVALID_RESULT;
@@ -29,14 +30,7 @@ public class SimpleIdentityStore implements IdentityStore {
 
         return userService.getByUsername(username)
                 .filter(u -> u.getPassword().equals(password))
-                .map(u -> new CredentialValidationResult(username ,new HashSet<>(Arrays.asList("foo", "bar"))))
+                .map(u -> new CredentialValidationResult(username, new HashSet<>(Collections.singletonList("user"))))
                 .orElse(INVALID_RESULT);
-
-//        if (user.getCaller().equalsIgnoreCase("Duke") && user.getPasswordAsString().equalsIgnoreCase("Dance")) {
-//
-//            return new CredentialValidationResult("Duke",new HashSet<>(Arrays.asList("foo", "bar")));
-//        }
-//
-//        return INVALID_RESULT;
     }
 }

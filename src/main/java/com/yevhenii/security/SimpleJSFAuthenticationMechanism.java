@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static javax.security.enterprise.identitystore.CredentialValidationResult.Status.VALID;
 
-@DeclareRoles({"foo", "bar", "kaz"})
+@DeclareRoles({"user"})
 @AutoApplySession
 @RequestScoped
 public class SimpleJSFAuthenticationMechanism implements HttpAuthenticationMechanism {
