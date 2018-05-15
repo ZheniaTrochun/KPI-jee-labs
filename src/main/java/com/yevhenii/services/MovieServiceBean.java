@@ -4,18 +4,20 @@ import com.yevhenii.dao.MovieDao;
 import com.yevhenii.model.Movie;
 
 import javax.ejb.*;
+import javax.inject.Inject;
 import java.util.List;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.CONTAINER)
-public class MovieServiceBean implements MovieService {
+public class MovieServiceBean implements MovieService {;
 
-    private static final MovieDao dao = MovieDao.getInstance();
+    @Inject
+    private MovieDao dao;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Movie save(Movie movie) {
-        Integer id = dao.save(movie);
+        Integer id = dao.save(movie).getId();
         movie.setId(id);
 
         return movie;
@@ -35,6 +37,6 @@ public class MovieServiceBean implements MovieService {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Movie update(Movie movie) {
-        return dao.update(movie) ? movie : null;
+        return dao.update(movie) != null ? movie : null;
     }
 }

@@ -1,62 +1,70 @@
 package com.yevhenii.dao;
 
-import com.yevhenii.dao.abstraction.PaginatedDao;
 import com.yevhenii.model.Movie;
 
-import javax.persistence.EntityManagerFactory;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Singleton
  */
-public class MovieDao extends PaginatedDao<Movie, Integer> {
+@Stateless
+public class MovieDao {
 
-    private static MovieDao instance;
+    @PersistenceContext
+    private EntityManager em;
 
-    private static final Object lock = new Object();
+    public Optional<Movie> findOne(Integer id) {
+        try {
+            return Optional.of(
+                    em.createQuery("select m from Movie m where m.id = :id", Movie.class)
+                            .setParameter("id", id)
+                            .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            e.printStackTrace();
 
-    MovieDao(int pageSize) {
-        super(Movie.class, "Movie", pageSize);
-    }
-
-    MovieDao() {
-        super(Movie.class, "Movie");
-    }
-
-    MovieDao(EntityManagerFactory entityManagerFactory) {
-        super(Movie.class, entityManagerFactory);
-    }
-
-    public static MovieDao getInstance() {
-        if (instance == null) {
-            synchronized (lock) {
-                if (instance == null)
-                    instance = new MovieDao();
-            }
+            return Optional.empty();
         }
-
-        return instance;
     }
 
-    @Override
-    protected Integer extractId(Movie entity) {
-        return entity.getId();
+    public List<Movie> findAll() {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Movie> cq = cb.createQuery(Movie.class);
+        Root<Movie> root = cq.from(Movie.class);
+        CriteriaQuery<Movie> all = cq.select(root);
+        TypedQuery<Movie> allQuery = em.createQuery(all);
+
+        return allQuery.getResultList();
     }
 
-    @Override
-    protected String getCreateSchemaQuery() {
-        return "CREATE TABLE Movie (\n" +
-                "    id int NOT NULL AUTO_INCREMENT,\n" +
-                "    name varchar(50),\n" +
-                "    author varchar(50),\n" +
-                "    year int,\n" +
-                "    genre varchar(255),\n" +
-                "    imdbScore double,\n" +
-                "    PRIMARY KEY (id),\n" +
-                ");";
+    public Movie update(Movie entity) {
+        return em.merge(entity);
     }
 
-    @Override
-    protected String getDropSchemaQuery() {
-        return "DROP TABLE Movie;";
+    public boolean delete(Integer id) {
+        try {
+            em.remove(findOne(id).orElse(null));
+
+            return true;
+        } catch (IllegalArgumentException | NullPointerException e) {
+            e.printStackTrace();
+
+            return false;
+        }
+    }
+
+    public Movie save(Movie entity) {
+        em.persist(entity);
+
+        return entity;
     }
 }
